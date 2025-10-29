@@ -1,0 +1,187 @@
+{
+  "name": "Legnext example",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        96
+      ],
+      "id": "81eab448-efaa-4711-b761-26e0a52b16ab",
+      "name": "Wait",
+      "webhookId": "53fa6b9f-8c52-477f-af8e-8ca6400c787f"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.legnext.ai/api/v1/diffusion",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "52b3526d-13da-418c-b7f3-9c760aa0d1b7",
+      "name": "POST"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.legnext.ai/api/v1/job/{{ $json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f91da31a-8863-4351-bc5a-d6a0a776b2ce",
+      "name": "GET"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9da9e2ef-168e-4997-82e4-d1b09cc5d2d7",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "3637dc23-b241-46cd-b0a8-2b5ed05daa54",
+      "name": "Status check",
+      "retryOnFail": false,
+      "maxTries": 5,
+      "waitBetweenTries": 500
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4eec7e84-d004-4d0e-a750-22f014e7403c",
+      "name": "Execute"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST": {
+      "main": [
+        [
+          {
+            "node": "GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET": {
+      "main": [
+        [
+          {
+            "node": "Status check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status check": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute": {
+      "main": [
+        [
+          {
+            "node": "POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "56fc01ae-13d5-450f-beb4-8ef5374e397d",
+  "meta": {
+    "instanceId": "bd7a8688fe4d17d42bd8c1d253c571a5cd2fdea5d0dd379e29e15e26efea5795"
+  },
+  "id": "JtatamkOJVF2gxYC",
+  "tags": []
+}
